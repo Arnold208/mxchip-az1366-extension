@@ -7,6 +7,25 @@ import { exec } from 'child_process';
 
 const TEMPLATE_REPO_URL = 'https://github.com/Arnold208/mxchip-standalone-sdk/archive/refs/heads/master.zip';
 
+const EXAMPLE_PROJECTS = {
+    exampleButtonScreenCounter: {
+        url: 'https://github.com/Arnold208/mxchip-button_screen_counter/archive/refs/heads/master.zip',
+        name: 'mxchip-button_screen_counter'
+    },
+    exampleButtonScreenRGB: {
+        url: 'https://github.com/Arnold208/mxchip_button__screen_rgb/archive/refs/heads/master.zip',
+        name: 'mxchip_button__screen_rgb'
+    },
+    exampleDinoGame: {
+        url: 'https://github.com/Arnold208/mxchip_dino_game/archive/refs/heads/master.zip',
+        name: 'mxchip_dino_game'
+    },
+    examplePingPongGame: {
+        url: 'https://github.com/Arnold208/mxchip_ping_pong_game/archive/refs/heads/master.zip',
+        name: 'mxchip_ping_pong_game'
+    }
+};
+
 async function downloadTemplate(url: string, destination: string): Promise<void> {
     const res = await fetch(url, {
         headers: {
@@ -45,6 +64,98 @@ function runBashScript(scriptPath: string) {
     });
 }
 
+async function handleExampleProject(example: { url: string, name: string }, context: vscode.ExtensionContext) {
+    const storagePath = context.globalStorageUri.fsPath;
+
+    // Ensure storage path exists
+    await fs.promises.mkdir(storagePath, { recursive: true });
+
+    const zipPath = path.join(storagePath, 'template.zip');
+
+    // Ask the user to select a directory to store the template
+    const selectedFolders = await vscode.window.showOpenDialog({
+        canSelectFolders: true,
+        canSelectFiles: false,
+        canSelectMany: false,
+        openLabel: 'Select folder to extract template'
+    });
+
+    if (!selectedFolders || selectedFolders.length === 0) {
+        vscode.window.showErrorMessage('No folder selected. Project creation cancelled.');
+        return;
+    }
+
+    const selectedFolder = selectedFolders[0].fsPath;
+
+    try {
+        vscode.window.showInformationMessage('Starting project creation...');
+        console.log(`Downloading template from ${example.url} to ${zipPath}`);
+
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Downloading template",
+            cancellable: false
+        }, async (progress) => {
+            await downloadTemplate(example.url, zipPath);
+        });
+
+        console.log(`Extracting template to ${selectedFolder}`);
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Extracting template",
+            cancellable: false
+        }, async (progress) => {
+            await extractTemplate(zipPath, selectedFolder);
+        });
+
+        const extractedFolder = path.join(selectedFolder, `${example.name}-master`);
+        const renamedFolder = path.join(selectedFolder, example.name);
+        
+        // Rename the extracted folder
+        await renameFolder(extractedFolder, renamedFolder);
+
+        vscode.window.showInformationMessage('C project created successfully!');
+
+        const openInNewWindow = "Open in New Window";
+        const openInCurrentWindow = "Open in Current Window";
+        const result = await vscode.window.showInformationMessage(
+            'Do you want to open the project in a new window or the current window?',
+            openInNewWindow,
+            openInCurrentWindow
+        );
+
+        if (result === openInNewWindow) {
+            await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(renamedFolder), true);
+
+            // Ensure the folder is opened before attempting to open the file
+            setTimeout(async () => {
+                const mainCPath = path.join(renamedFolder, 'main.c'); // Update this based on the actual path
+                const document = await vscode.workspace.openTextDocument(mainCPath);
+                await vscode.window.showTextDocument(document);
+            }, 2000);
+
+        } else if (result === openInCurrentWindow) {
+            await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(renamedFolder), false);
+
+            // Ensure the folder is opened before attempting to open the file
+            setTimeout(async () => {
+                const mainCPath = path.join(renamedFolder, 'main.c'); // Update this based on the actual path
+                const document = await vscode.workspace.openTextDocument(mainCPath);
+                await vscode.window.showTextDocument(document);
+            }, 2000);
+        }
+
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error(`Error: ${error.message}`);
+            vscode.window.showErrorMessage('Failed to create C project: ' + error.message);
+        } else {
+            console.error('Unknown error occurred');
+            vscode.window.showErrorMessage('Failed to create C project: An unknown error occurred');
+        }
+    }
+}
+
 export function activate(context: vscode.ExtensionContext) {
     let createProjectDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPCreateProject', async () => {
         const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -53,12 +164,7 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        const storagePath = context.storagePath;
-
-        if (!storagePath) {
-            vscode.window.showErrorMessage('Failed to determine storage path for the extension.');
-            return;
-        }
+        const storagePath = context.globalStorageUri.fsPath;
 
         // Ensure storage path exists
         await fs.promises.mkdir(storagePath, { recursive: true });
@@ -117,13 +223,12 @@ export function activate(context: vscode.ExtensionContext) {
                 openInCurrentWindow
             );
 
-            const mainCPath = path.join(renamedFolder, 'MXChip/AZ3166/app/main.c');
-
             if (result === openInNewWindow) {
                 await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(renamedFolder), true);
 
                 // Ensure the folder is opened before attempting to open the file
                 setTimeout(async () => {
+                    const mainCPath = path.join(renamedFolder, 'MXChip/AZ3166/app/main.c');
                     const document = await vscode.workspace.openTextDocument(mainCPath);
                     await vscode.window.showTextDocument(document);
                 }, 2000);
@@ -133,6 +238,7 @@ export function activate(context: vscode.ExtensionContext) {
 
                 // Ensure the folder is opened before attempting to open the file
                 setTimeout(async () => {
+                    const mainCPath = path.join(renamedFolder, 'MXChip/AZ3166/app/main.c');
                     const document = await vscode.workspace.openTextDocument(mainCPath);
                     await vscode.window.showTextDocument(document);
                 }, 2000);
@@ -177,8 +283,28 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    let exampleButtonScreenCounterDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExampleButtonScreenCounter', async () => {
+        await handleExampleProject(EXAMPLE_PROJECTS.exampleButtonScreenCounter, context);
+    });
+
+    let exampleButtonScreenRGBDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExampleButtonScreenRGB', async () => {
+        await handleExampleProject(EXAMPLE_PROJECTS.exampleButtonScreenRGB, context);
+    });
+
+    let exampleDinoGameDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExampleDinoGame', async () => {
+        await handleExampleProject(EXAMPLE_PROJECTS.exampleDinoGame, context);
+    });
+
+    let examplePingPongGameDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExamplePingPongGame', async () => {
+        await handleExampleProject(EXAMPLE_PROJECTS.examplePingPongGame, context);
+    });
+
     context.subscriptions.push(createProjectDisposable);
     context.subscriptions.push(uploadProjectDisposable);
+    context.subscriptions.push(exampleButtonScreenCounterDisposable);
+    context.subscriptions.push(exampleButtonScreenRGBDisposable);
+    context.subscriptions.push(exampleDinoGameDisposable);
+    context.subscriptions.push(examplePingPongGameDisposable);
 }
 
 export function deactivate() {}

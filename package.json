@@ -11,7 +11,11 @@
   ],
   "activationEvents": [
     "onCommand:mxchip-az1366.MXCHIPCreateProject",
-    "onCommand:mxchip-az1366.MXCHIPUploadProject"
+    "onCommand:mxchip-az1366.MXCHIPUploadProject",
+    "onCommand:mxchip-az1366.MXCHIPExampleButtonScreenCounter",
+    "onCommand:mxchip-az1366.MXCHIPExampleButtonScreenRGB",
+    "onCommand:mxchip-az1366.MXCHIPExampleDinoGame",
+    "onCommand:mxchip-az1366.MXCHIPExamplePingPongGame"
   ],
   "main": "./dist/extension.js",
   "type": "commonjs",
@@ -19,11 +23,27 @@
     "commands": [
       {
         "command": "mxchip-az1366.MXCHIPCreateProject",
-        "title": "MXCHIP: Create New Project"
+        "title": "Mxchip Create New MXCHIP AZ1366 Project"
       },
       {
         "command": "mxchip-az1366.MXCHIPUploadProject",
-        "title": "MXCHIP: Upload Project"
+        "title": "Mxchip Upload Project"
+      },
+      {
+        "command": "mxchip-az1366.MXCHIPExampleButtonScreenCounter",
+        "title": "Mxchip Example: Button Screen Counter"
+      },
+      {
+        "command": "mxchip-az1366.MXCHIPExampleButtonScreenRGB",
+        "title": "Mxchip Example: Button Screen RGB"
+      },
+      {
+        "command": "mxchip-az1366.MXCHIPExampleDinoGame",
+        "title": "Mxchip Example: Dino Game"
+      },
+      {
+        "command": "mxchip-az1366.MXCHIPExamplePingPongGame",
+        "title": "Mxchip Example: Ping Pong Game"
       }
     ]
   },
