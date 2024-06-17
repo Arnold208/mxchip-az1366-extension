@@ -1,8 +1,10 @@
 {
-  "name": "mxchip-az1366",
-  "displayName": "MXCHIP AZ1366",
-  "description": "This is the new template for the mxchip az1366",
-  "version": "0.0.1",
+  "name": "mxchip-az1366-toolbox",
+  "displayName": "MXCHIP AZ1366 TOOLBOX",
+  "description": "This is a diverse toolbox for the MXCHIP AZ1366, with example code for your projects.",
+  "icon":"images/mxchip_toolbox_round.png",
+  "version": "0.1.1",
+  "license":"MIT",
   "engines": {
     "vscode": "^1.87.0"
   },
@@ -15,7 +17,8 @@
     "onCommand:mxchip-az1366.MXCHIPExampleButtonScreenCounter",
     "onCommand:mxchip-az1366.MXCHIPExampleButtonScreenRGB",
     "onCommand:mxchip-az1366.MXCHIPExampleDinoGame",
-    "onCommand:mxchip-az1366.MXCHIPExamplePingPongGame"
+    "onCommand:mxchip-az1366.MXCHIPExamplePingPongGame",
+    "onCommand:mxchip-az1366.MXCHIPInstallDrivers"
   ],
   "main": "./dist/extension.js",
   "type": "commonjs",
@@ -44,6 +47,11 @@
       {
         "command": "mxchip-az1366.MXCHIPExamplePingPongGame",
         "title": "Mxchip Example: Ping Pong Game"
+      }
+      ,
+      {
+        "command": "mxchip-az1366.MXCHIPInstallDrivers",
+        "title": "Mxchip Install Drivers"
       }
     ]
   },
@@ -79,6 +87,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Arnold208/mxchip-standalone-sdk.git"
-  }
+    "url": "https://github.com/Arnold208/mxchip-az1366-extension.git"
+  },
+  "publisher": "AfrilogicSolutions"
 }

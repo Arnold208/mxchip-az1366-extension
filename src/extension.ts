@@ -64,6 +64,47 @@ function runBashScript(scriptPath: string) {
     });
 }
 
+function runBashScriptPass(scriptPath: string) {
+    return new Promise<void>((resolve, reject) => {
+        vscode.window.showInputBox({
+            prompt: 'Enter your password',
+            password: true
+        }).then(password => {
+            if (!password) {
+                vscode.window.showErrorMessage('Password is required to run the script.');
+                reject(new Error('Password is required'));
+                return;
+            }
+
+            exec(`echo "${password}" | sudo -S bash ${scriptPath}`, (error, stdout, stderr) => {
+                if (error) {
+                    vscode.window.showErrorMessage(`Error: ${stderr}`);
+                    reject(error);
+                } else {
+                    vscode.window.showInformationMessage(`Success: ${stdout}`);
+                    resolve();
+                }
+            });
+        });
+    });
+}
+
+function runPowerShellScript(scriptPath: string) {
+    return new Promise<void>((resolve, reject) => {
+        exec(`powershell -ExecutionPolicy Bypass -File "${scriptPath}"`, (error, stdout, stderr) => {
+            if (error) {
+                vscode.window.showErrorMessage(`Error: ${stderr}`);
+                reject(error);
+            } else {
+                vscode.window.showInformationMessage(`Success: ${stdout}`);
+                resolve();
+            }
+        });
+    });
+}
+
+
+
 async function handleExampleProject(example: { url: string, name: string }, context: vscode.ExtensionContext) {
     const storagePath = context.globalStorageUri.fsPath;
 
@@ -110,7 +151,7 @@ async function handleExampleProject(example: { url: string, name: string }, cont
 
         const extractedFolder = path.join(selectedFolder, `${example.name}-master`);
         const renamedFolder = path.join(selectedFolder, example.name);
-        
+
         // Rename the extracted folder
         await renameFolder(extractedFolder, renamedFolder);
 
@@ -159,10 +200,10 @@ async function handleExampleProject(example: { url: string, name: string }, cont
 export function activate(context: vscode.ExtensionContext) {
     let createProjectDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPCreateProject', async () => {
         const workspaceFolders = vscode.workspace.workspaceFolders;
-        if (!workspaceFolders) {
-            vscode.window.showErrorMessage('Please open a workspace folder first.');
-            return;
-        }
+        // if (!workspaceFolders) {
+        //     vscode.window.showErrorMessage('Please open a workspace folder first.');
+        //     return;
+        // }
 
         const storagePath = context.globalStorageUri.fsPath;
 
@@ -209,7 +250,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             const extractedFolder = path.join(selectedFolder, 'mxchip-standalone-sdk-master');
             const renamedFolder = path.join(selectedFolder, 'mxchip-standalone-sdk');
-            
+
             // Rename the extracted folder
             await renameFolder(extractedFolder, renamedFolder);
 
@@ -261,28 +302,89 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showErrorMessage('Please open a workspace folder first.');
             return;
         }
-
+    
         const workspacePath = workspaceFolders[0].uri.fsPath;
         const scriptPath = path.join(workspacePath, 'upload.sh');
-
+    
         if (!fs.existsSync(scriptPath)) {
             vscode.window.showErrorMessage('upload.sh script not found in the workspace root.');
             return;
         }
-
+    
         try {
-            await vscode.window.withProgress({
-                location: vscode.ProgressLocation.Notification,
-                title: "Building and Uploading Firmware, Please wait...",
-                cancellable: false
-            }, async (progress) => {
-                await runBashScript(scriptPath);
-            });
+            if (process.platform === 'win32') {
+                const powershellScriptPath = path.join(workspacePath, 'win-upload.ps1');
+                if (fs.existsSync(powershellScriptPath)) {
+                    await vscode.window.withProgress({
+                        location: vscode.ProgressLocation.Notification,
+                        title: 'Windows: Building and Uploading Firmware, Please wait...',
+                        cancellable: false
+                    }, async () => {
+                        await runPowerShellScript(powershellScriptPath);
+                    });
+                } else {
+                    vscode.window.showErrorMessage('win-upload.ps1 script not found in the workspace root.');
+                }
+            } else if (process.platform === 'linux' || process.platform === 'darwin') {
+                await vscode.window.withProgress({
+                    location: vscode.ProgressLocation.Notification,
+                    title: `${process.platform}: Building and Uploading Firmware, Please wait...`,
+                    cancellable: false
+                }, async () => {
+                    await runBashScript(scriptPath);
+                });
+            } else {
+                console.log(`Unsupported platform: ${process.platform}. Cannot upload project.`);
+            }
         } catch (error) {
             console.error(`Error running upload script: ${error}`);
         }
     });
-
+    
+    let installProjectdriversDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPInstallDrivers', async () => {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders) {
+            vscode.window.showErrorMessage('Please open a workspace folder first.');
+            return;
+        }
+    
+        const workspacePath = workspaceFolders[0].uri.fsPath;
+        const scriptPath = path.join(workspacePath, 'tools/get-toolchain.sh');
+    
+        if (!fs.existsSync(scriptPath)) {
+            vscode.window.showErrorMessage('Driver script not found in the workspace root.');
+            return;
+        }
+    
+        try {
+            if (process.platform === 'win32') {
+                const powershellScriptPath = path.join(workspacePath, 'tools/get-toolchain.ps1');
+                if (fs.existsSync(powershellScriptPath)) {
+                    await vscode.window.withProgress({
+                        location: vscode.ProgressLocation.Notification,
+                        title: 'Windows: Installing Drivers, Please wait...',
+                        cancellable: false
+                    }, async () => {
+                        await runPowerShellScript(powershellScriptPath);
+                    });
+                } else {
+                    vscode.window.showErrorMessage('tools/get-toolchain.ps1 script not found in the workspace root.');
+                }
+            } else if (process.platform === 'linux') {
+                await vscode.window.withProgress({
+                    location: vscode.ProgressLocation.Notification,
+                    title: `${process.platform}: Installing Drivers, Please wait...`,
+                    cancellable: false
+                }, async () => {
+                    await runBashScriptPass(scriptPath);
+                });
+            } else {
+                console.log(`Unsupported platform: ${process.platform}. Cannot install drivers.`);
+            }
+        } catch (error) {
+            console.error(`Error running install drivers script: ${error}`);
+        }
+    });
     let exampleButtonScreenCounterDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExampleButtonScreenCounter', async () => {
         await handleExampleProject(EXAMPLE_PROJECTS.exampleButtonScreenCounter, context);
     });
@@ -301,10 +403,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(createProjectDisposable);
     context.subscriptions.push(uploadProjectDisposable);
+    context.subscriptions.push(installProjectdriversDisposable);
     context.subscriptions.push(exampleButtonScreenCounterDisposable);
     context.subscriptions.push(exampleButtonScreenRGBDisposable);
     context.subscriptions.push(exampleDinoGameDisposable);
     context.subscriptions.push(examplePingPongGameDisposable);
 }
 
-export function deactivate() {}
+export function deactivate() { }
