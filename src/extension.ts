@@ -23,6 +23,10 @@ const EXAMPLE_PROJECTS = {
     examplePingPongGame: {
         url: 'https://github.com/Arnold208/mxchip_ping_pong_game/archive/refs/heads/master.zip',
         name: 'mxchip_ping_pong_game'
+    },
+    exampleIoTHubTelemetry: {
+        url: 'https://github.com/Arnold208/mxchip-iothub-telemetry/archive/refs/heads/master.zip',
+        name: 'mxchip_iothub_telemetry'
     }
 };
 
@@ -103,8 +107,6 @@ function runPowerShellScript(scriptPath: string) {
     });
 }
 
-
-
 async function handleExampleProject(example: { url: string, name: string }, context: vscode.ExtensionContext) {
     const storagePath = context.globalStorageUri.fsPath;
 
@@ -152,6 +154,14 @@ async function handleExampleProject(example: { url: string, name: string }, cont
         const extractedFolder = path.join(selectedFolder, `${example.name}-master`);
         const renamedFolder = path.join(selectedFolder, example.name);
 
+        console.log(`Extracted folder: ${extractedFolder}`);
+        console.log(`Renamed folder: ${renamedFolder}`);
+
+        // Check if the extracted folder exists
+        if (!fs.existsSync(extractedFolder)) {
+            throw new Error(`Extracted folder does not exist: ${extractedFolder}`);
+        }
+
         // Rename the extracted folder
         await renameFolder(extractedFolder, renamedFolder);
 
@@ -171,8 +181,14 @@ async function handleExampleProject(example: { url: string, name: string }, cont
             // Ensure the folder is opened before attempting to open the file
             setTimeout(async () => {
                 const mainCPath = path.join(renamedFolder, 'main.c'); // Update this based on the actual path
-                const document = await vscode.workspace.openTextDocument(mainCPath);
-                await vscode.window.showTextDocument(document);
+                console.log(`Trying to open: ${mainCPath}`);
+                if (fs.existsSync(mainCPath)) {
+                    const document = await vscode.workspace.openTextDocument(mainCPath);
+                    await vscode.window.showTextDocument(document);
+                } else {
+                    console.error(`File not found: ${mainCPath}`);
+                    vscode.window.showErrorMessage(`File not found: ${mainCPath}`);
+                }
             }, 2000);
 
         } else if (result === openInCurrentWindow) {
@@ -181,8 +197,14 @@ async function handleExampleProject(example: { url: string, name: string }, cont
             // Ensure the folder is opened before attempting to open the file
             setTimeout(async () => {
                 const mainCPath = path.join(renamedFolder, 'main.c'); // Update this based on the actual path
-                const document = await vscode.workspace.openTextDocument(mainCPath);
-                await vscode.window.showTextDocument(document);
+                console.log(`Trying to open: ${mainCPath}`);
+                if (fs.existsSync(mainCPath)) {
+                    const document = await vscode.workspace.openTextDocument(mainCPath);
+                    await vscode.window.showTextDocument(document);
+                } else {
+                    console.error(`File not found: ${mainCPath}`);
+                    vscode.window.showErrorMessage(`File not found: ${mainCPath}`);
+                }
             }, 2000);
         }
 
@@ -251,6 +273,14 @@ export function activate(context: vscode.ExtensionContext) {
             const extractedFolder = path.join(selectedFolder, 'mxchip-standalone-sdk-master');
             const renamedFolder = path.join(selectedFolder, 'mxchip-standalone-sdk');
 
+            console.log(`Extracted folder: ${extractedFolder}`);
+            console.log(`Renamed folder: ${renamedFolder}`);
+
+            // Check if the extracted folder exists
+            if (!fs.existsSync(extractedFolder)) {
+                throw new Error(`Extracted folder does not exist: ${extractedFolder}`);
+            }
+
             // Rename the extracted folder
             await renameFolder(extractedFolder, renamedFolder);
 
@@ -270,8 +300,14 @@ export function activate(context: vscode.ExtensionContext) {
                 // Ensure the folder is opened before attempting to open the file
                 setTimeout(async () => {
                     const mainCPath = path.join(renamedFolder, 'MXChip/AZ3166/app/main.c');
-                    const document = await vscode.workspace.openTextDocument(mainCPath);
-                    await vscode.window.showTextDocument(document);
+                    console.log(`Trying to open: ${mainCPath}`);
+                    if (fs.existsSync(mainCPath)) {
+                        const document = await vscode.workspace.openTextDocument(mainCPath);
+                        await vscode.window.showTextDocument(document);
+                    } else {
+                        console.error(`File not found: ${mainCPath}`);
+                        vscode.window.showErrorMessage(`File not found: ${mainCPath}`);
+                    }
                 }, 2000);
 
             } else if (result === openInCurrentWindow) {
@@ -280,8 +316,14 @@ export function activate(context: vscode.ExtensionContext) {
                 // Ensure the folder is opened before attempting to open the file
                 setTimeout(async () => {
                     const mainCPath = path.join(renamedFolder, 'MXChip/AZ3166/app/main.c');
-                    const document = await vscode.workspace.openTextDocument(mainCPath);
-                    await vscode.window.showTextDocument(document);
+                    console.log(`Trying to open: ${mainCPath}`);
+                    if (fs.existsSync(mainCPath)) {
+                        const document = await vscode.workspace.openTextDocument(mainCPath);
+                        await vscode.window.showTextDocument(document);
+                    } else {
+                        console.error(`File not found: ${mainCPath}`);
+                        vscode.window.showErrorMessage(`File not found: ${mainCPath}`);
+                    }
                 }, 2000);
             }
 
@@ -401,6 +443,10 @@ export function activate(context: vscode.ExtensionContext) {
         await handleExampleProject(EXAMPLE_PROJECTS.examplePingPongGame, context);
     });
 
+    let exampleIoTHubTelemetryDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExampleIoTHubTelemetry', async () => {
+        await handleExampleProject(EXAMPLE_PROJECTS.exampleIoTHubTelemetry, context);
+    });
+
     context.subscriptions.push(createProjectDisposable);
     context.subscriptions.push(uploadProjectDisposable);
     context.subscriptions.push(installProjectdriversDisposable);
@@ -408,6 +454,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(exampleButtonScreenRGBDisposable);
     context.subscriptions.push(exampleDinoGameDisposable);
     context.subscriptions.push(examplePingPongGameDisposable);
+    context.subscriptions.push(exampleIoTHubTelemetryDisposable);
 }
 
 export function deactivate() { }

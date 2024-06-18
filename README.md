@@ -78,7 +78,13 @@ This extension contributes the following settings:
 
 ## 🚧 Known Issues
 
-- macOS and iOS systems are not supported at the moment. The release for macOS and iOS will be out soon.
+- **macOS and iOS Systems Not Supported**: Release for macOS and iOS will be out soon.
+- **Path Length Limitations(Windows)**: Enabling long paths in Windows can introduce potential compatibility issues with older applications or tools that do not support long paths. Additionally, certain file system tools might not handle long paths correctly, which can affect the integrity of backups or other file system operations. Long and complex paths might also make it more challenging to manage and audit user permissions, and malware or malicious users might take advantage of long paths to hide files or directories.
+  - **Solution**: To enable long paths in Windows, you can follow these steps:
+    1. Open the `Local Group Policy Editor` by typing `gpedit.msc` in the Run dialog (Win + R).
+    2. Navigate to `Local Computer Policy` > `Computer Configuration` > `Administrative Templates` > `System` > `Filesystem`.
+    3. Double-click on `Enable NTFS long paths` and set it to `Enabled`.
+    4. Click `OK` and restart your computer.
 
 
 ## 🤝 Credits
