@@ -38,6 +38,15 @@ Join us as we transform your development experience into a thrilling adventure w
 - Restart VSCode, then press `F1`, type the command `Mxchip Upload Project`, and make sure your MXchip is connected to the host machine.
 - Wait for the program to build and install on the devkit.
 
+### 📹 Cmake Env Variables
+
+<div style="text-align:center;">
+  <video width="600" controls>
+    <source src="media/cmake.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</div>
+
 ### For Linux Users
 
 - For first-time users, press `F1` and type and select the command `Mxchip Create New MXCHIP AZ1366 Project`.
@@ -65,15 +74,25 @@ This extension contributes the following settings:
 - `mxchip-az1366.MXCHIPExamplePingPongGame`: Mxchip Example: Ping Pong Game.
 - `mxchip-az1366.MXCHIPInstallDrivers`: Mxchip Install Drivers.
 
-## Roadmap / Upcoming Features 🌟
+## 📅 Roadmap / Upcoming Features
 
-- **Node-RED Integration**: Intuitive flow-based programming for your Mxchip.
-- **Azure Event Grid**: Orchestrate events with lightning speed.
-- **.NET Nano Framework**: Enhanced capabilities for your Mxchip projects.
+- 🌐 **Node-RED Integration**: Effortlessly link your devkit to diverse platforms with Node-RED.
+- ☁️ **Azure Event Grid**: Harness the immense capabilities of Azure Event Grid.
+- ⚙️ **.NET Nano Framework**: Explore the capabilities of the .NET Nano Framework.
+- 🔄 **MQTT Support**: Utilize cutting-edge MQTT protocols for seamless communication.
 
-## Known Issues
+## 🚧 Known Issues
 
 - macOS and iOS systems are not supported at the moment. The release for macOS and iOS will be out soon.
+
+
+## 🤝 Credits
+
+Special thanks to the original creators of the code:
+
+- [Microsoft Learn Tutorial for MXCHIP AZ3166](https://learn.microsoft.com/en-us/azure/iot/tutorial-devkit-mxchip-az3166-iot-hub)
+- [Eclipse ThreadX Getting Started Guide](https://github.com/eclipse-threadx/getting-started)
+
 
 ## For More Information
 
@@ -85,4 +104,25 @@ This extension contributes the following settings:
 - [Subscribe to the IoT Tuesday Show on YouTube by Samuel Adranyi](https://www.youtube.com/@sadranyi)
 - [IoT Tuesday Show Series on the MXChip](https://www.youtube.com/watch?v=XN3sm4AvYFg)
 
+
+## 🛠 Contributing
+
+We welcome contributions from the community! To contribute:
+
+1. Fork the repository on GitHub.
+2. Create a new branch from `main`.
+3. Make your changes and commit them with clear messages.
+4. Push your changes to your forked repository.
+5. Create a Pull Request (PR) to the `main` branch of the original repository.
+
+Please ensure your code adheres to our coding standards and includes tests where applicable.
+
+## 🐛 Issue Tracking
+
+Found a bug or have a feature request? Please open an issue on our [GitHub Issues](https://github.com/Arnold208/mxchip-az1366-extension/issues) page.
+
+## 📜 License
+
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/Arnold208/mxchip-az1366-extension/blob/main/LICENSE) file for details.
+ 
 **Enjoy!** 🎉
