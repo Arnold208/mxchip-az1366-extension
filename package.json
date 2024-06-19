@@ -3,7 +3,7 @@
   "displayName": "MXCHIP AZ1366 TOOLBOX",
   "description": "The ultimate toolbox for the MXCHIP AZ1366, with example code for your projects.",
   "icon":"images/mxchip_toolbox-modified.png",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "license":"MIT",
   "engines": {
     "vscode": "^1.87.0"
@@ -52,7 +52,11 @@
       {
         "command": "mxchip-az1366.MXCHIPInstallDrivers",
         "title": "Mxchip Install Drivers"
-      }
+      },
+      {
+        "command": "mxchip-az1366.MXCHIPExampleIoTHubTelemetry",
+        "title": "Mxchip Example: IoT Hub Telemetry"
+    }
     ]
   },
   "scripts": {
