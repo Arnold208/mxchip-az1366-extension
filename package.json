@@ -1,9 +1,9 @@
 {
-  "name": "mxchip-az1366-toolbox",
-  "displayName": "MXCHIP AZ1366 TOOLBOX",
+  "name": "mxchip-az1366-toolbox-test",
+  "displayName": "MXCHIP AZ1366 TOOLBOX-Test",
   "description": "The ultimate toolbox for the MXCHIP AZ1366, with example code for your projects.",
   "icon":"images/mxchip_toolbox-modified.png",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "license":"MIT",
   "engines": {
     "vscode": "^1.87.0"
@@ -26,7 +26,7 @@
     "commands": [
       {
         "command": "mxchip-az1366.MXCHIPCreateProject",
-        "title": "Mxchip Create New MXCHIP AZ1366 Project"
+        "title": "Mxchip Create New Project"
       },
       {
         "command": "mxchip-az1366.MXCHIPUploadProject",
@@ -34,19 +34,19 @@
       },
       {
         "command": "mxchip-az1366.MXCHIPExampleButtonScreenCounter",
-        "title": "Mxchip Example: Button Screen Counter"
+        "title": "Mxchip Example: Counter"
       },
       {
         "command": "mxchip-az1366.MXCHIPExampleButtonScreenRGB",
-        "title": "Mxchip Example: Button Screen RGB"
+        "title": "Mxchip Example: Button"
       },
       {
         "command": "mxchip-az1366.MXCHIPExampleDinoGame",
-        "title": "Mxchip Example: Dino Game"
+        "title": "Mxchip Example: Dino"
       },
       {
         "command": "mxchip-az1366.MXCHIPExamplePingPongGame",
-        "title": "Mxchip Example: Ping Pong Game"
+        "title": "Mxchip Example: Ping Pong"
       }
       ,
       {
@@ -55,7 +55,7 @@
       },
       {
         "command": "mxchip-az1366.MXCHIPExampleIoTHubTelemetry",
-        "title": "Mxchip Example: IoT Hub Telemetry"
+        "title": "Mxchip Example: Telemetry"
     }
     ]
   },
