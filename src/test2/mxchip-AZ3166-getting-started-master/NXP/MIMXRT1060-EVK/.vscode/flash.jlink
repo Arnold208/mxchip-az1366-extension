@@ -1,3 +1,0 @@
-loadfile build/app/mimxrt1060_azure_iot.hex
-r0
-q

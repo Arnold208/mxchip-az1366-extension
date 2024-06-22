@@ -1,9 +1,9 @@
 {
-  "name": "mxchip-az1366-toolbox-test",
-  "displayName": "MXCHIP AZ1366 TOOLBOX-Test",
+  "name": "mxchip-az1366-toolbox",
+  "displayName": "MXCHIP AZ1366 TOOLBOX",
   "description": "The ultimate toolbox for the MXCHIP AZ1366, with example code for your projects.",
   "icon":"images/mxchip_toolbox-modified.png",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "license":"MIT",
   "engines": {
     "vscode": "^1.87.0"
