@@ -3,4 +3,5 @@ dist
 node_modules
 .vscode-test/
 *.vsix
-src/test2/*
+src/test2/
+src/test
