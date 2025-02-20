@@ -404,7 +404,7 @@ export function activate(context: vscode.ExtensionContext) {
         await handleExampleProject(EXAMPLE_PROJECTS.exampleIoTHubTelemetry, context);
     });
 
-    let exampleMQTTClientDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExampleMQTTClient', async () => {
+    let exampleMQTTClientDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPMQTTClient', async () => {
         await handleExampleProject(EXAMPLE_PROJECTS.exampleMQTTClient, context);
     });
 
