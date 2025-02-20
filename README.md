@@ -1,61 +1,95 @@
 # MXCHIP AZ1366 TOOLBOX
 
-Welcome to the **Mxchip AX1366 Toolbox** 🛠️, your gateway to a limitless realm of IoT and Embedded Systems projects! With this toolbox at your fingertips, you'll delve into the exciting world of device development, from crafting intricate button and LED interactions to seamlessly transmitting sensor data to your [Azure Platform](https://portal.azure.com).
+Welcome to the **Mxchip AX1366 Toolbox** 🛠️, your gateway to a limitless realm of **IoT and Embedded Systems** projects! With this toolbox at your fingertips, you'll delve into the exciting world of device development, from crafting intricate button and LED interactions to seamlessly transmitting sensor data to your [Azure Platform](https://portal.azure.com).
 
-But that's just the beginning! In upcoming releases, brace yourself for a journey into connectivity mastery. Picture this: effortlessly linking your devkit to diverse platforms like the intuitive flow-based programming of [Node-RED](https://nodered.org) 🌐, harnessing the immense capabilities of [Azure IoT Hub](https://learn.microsoft.com/en-us/azure/iot-hub) ☁️, or orchestrating events with lightning speed using [Event Grid](https://learn.microsoft.com/en-us/azure/event-grid/overview) ⚡. All this magic unfolds through cutting-edge protocols like MQTT or the ever-reliable Wi-Fi 📶.
+But that's just the beginning! In upcoming releases, get ready to **expand connectivity options** 🚀:
+- ✅ **MQTT Integration**: Effortlessly publish and subscribe to topics using [Mosquitto MQTT](https://mosquitto.org/) or [Azure IoT Hub](https://learn.microsoft.com/en-us/azure/iot-hub).
+- 🌐 **Node-RED Connectivity**: Use the intuitive **flow-based programming** of [Node-RED](https://nodered.org) for rapid prototyping.
+- ⚡ **Azure Event Grid Support**: Harness **real-time event-driven** architecture with [Event Grid](https://learn.microsoft.com/en-us/azure/event-grid/overview).
+- 📶 **Advanced Protocol Support**: Work with **Wi-Fi, MQTT, and HTTP APIs** to enable **seamless device-to-cloud communication**.
 
-Join us as we transform your development experience into a thrilling adventure where innovation knows no bounds! 🌟
+Join us as we transform your development experience into a **thrilling adventure** where innovation knows no bounds! 🌟
 
-## Current Features
+---
 
+## **✨ New Features in This Release**
+### **🔹 MQTT Support**
+- Easily **publish sensor data** to an MQTT broker using **Mosquitto**.
+- Subscribe to topics and control your MXChip remotely via MQTT messages.
+- Connect with **popular MQTT brokers**, including:
+  - [Mosquitto MQTT Broker](https://mosquitto.org/)
+  - [HiveMQ Public Broker](https://www.hivemq.com/public-mqtt-broker/)
+  - [Azure IoT Hub MQTT](https://learn.microsoft.com/en-us/azure/iot-hub/iot-hub-mqtt-support)
+  - [Adafruit IO](https://io.adafruit.com/)
+  
+💡 **Example:** Publish temperature sensor data to an MQTT topic:
+```c
+mqtt_publish("devices/mxchip/sensors", "{\"temperature\": 24.5, \"humidity\": 60}");
+```
+
+---
+
+## **Current Features**
 - **Project Scaffolding**: Scaffold a new project with predefined templates 📝.
 - **Mxchip Example Projects**: Included in this toolbox are some example projects to help interact with the Mxchip Az1366 🎓.
-- **Easy Driver Installation for Project**: Supports downloading and extracting project templates automatically from a GitHub repository 💻.
+- **Easy Driver Installation**: Supports downloading and extracting project templates automatically from GitHub 💻.
+- **MQTT Integration**: Connect to an MQTT broker, publish sensor data, and control the devkit remotely. 🚀
 
-## Example Projects Available
+---
 
+## **Example Projects Available**
 - **Button Screen RGB**: Interact with buttons and LEDs and watch the OLED screen change on the MXchip 🎨.
-- **Button Screen Counter**: By pressing the onboard buttons, initiate a count system on the dev board and display on the screen 🔢.
-- **Dino Game**: Test the popular Dino game from [Google Chrome](https://www.google.com/chrome) on your favorite Mxchip devkit 🦖.
-- **Ping Pong Game**: Play the classic Ping Pong game on your Mxchip now 🏓.
-- **IoT Hub Telemetry**: Read sensor data from the devkit and publish it to IoT Hub 📈.
+- **Button Screen Counter**: Initiate a count system on the dev board and display it on the screen 🔢.
+- **Dino Game**: Play the **Google Chrome Dino game** on your Mxchip devkit 🦖.
+- **Ping Pong Game**: Enjoy the classic **Ping Pong** game on your MXChip 🏓.
+- **IoT Hub Telemetry**: Read sensor data from the devkit and publish it to **Azure IoT Hub** 📈.
+- **MQTT Client Example**: Publish and subscribe to MQTT topics in real-time 📡.
 
-### Screenshots
+---
 
-![alt text](https://th.bing.com/th/id/R.3395ddef35554bc223c95c8f66609a5b?rik=8itn3S%2bTmNHZfQ&riu=http%3a%2f%2fwww.cnx-software.com%2fwp-content%2fuploads%2f2017%2f06%2fMXCHIP-Azure-IoT-Devkit.jpg&ehk=S7IU0FnclXa55Rw%2fpq6w1N44vejmZIVx5r2Ep4j5G7s%3d&risl=&pid=ImgRaw&r=0)
+## **🖥️ Setup Guide**
+### **For Windows Users**
+1. Run this command in **PowerShell as Admin**:
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+   ```
+2. Press **Y**, then Enter.
+3. Press `F1`, type and select `Mxchip Create New MXCHIP AZ1366 Project`.
+4. Open the project in a **new window**.
+5. Press `F1`, select **`Mxchip Install Drivers`**.
+   - This will install `cmake`, `GCC ARM Toolchain`, and other dependencies.
+   - *(Note: This step may take some time, so grab a coffee ☕.)*
+6. Restart VSCode, then press `F1`, type **`Mxchip Upload Project`**, and connect your MXchip.
+7. Wait for the build to complete and the firmware to install.
 
-## Requirements
+### **For Linux Users**
+1. Press `F1`, type and select `Mxchip Create New MXCHIP AZ1366 Project`.
+2. Open the project in a new window.
+3. Press `F1`, select **`Mxchip Install Drivers`** (Enter your password to install `cmake`).
+4. Restart VSCode, then press `F1`, type **`Mxchip Upload Project`**, and connect your MXchip.
+5. Wait for the build and installation to complete.
 
-### For Windows Users
+---
 
-- For first-time users, run this command in PowerShell as an **Admin**: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned`.
-- After that, type **Y** and press Enter.
-- Press `F1` and type and select the command `Mxchip Create New MXCHIP AZ1366 Project`.
-- After the project has been scaffolded, open it in a new window or the current one.
-- Press `F1` and type the command `Mxchip Install Drivers` and select it. Click yes to the prompt to install `cmake`.
-  - (Please note this step may take some time, so please grab a cup of coffee ☕ and wait).
-- Once the drivers are installed, include cmake in the environmental path. See the gif below for a guide.
-- Restart VSCode, then press `F1`, type the command `Mxchip Upload Project`, and make sure your MXchip is connected to the host machine.
-- Wait for the program to build and install on the devkit.
+## **🚧 Upcoming Features**
+### 🌐 **Node-RED Integration**
+- Seamlessly integrate with **Node-RED** to visualize and control sensor data.
+- Drag-and-drop MQTT blocks for **low-code automation**.
 
-### 📹 Cmake Env Variables
+### ☁️ **Azure Event Grid**
+- Use **Azure Event Grid** for **real-time IoT event-driven applications**.
+- Stream data directly from MXChip to **serverless functions & cloud services**.
 
-[![Watch the video]](https://github.com/Arnold208/mxchip-az1366-extension/blob/master/media/cmake.mp4)
+---
 
-### For Linux Users
+## **📅 Roadmap**
+✔ **Current:** MQTT integration with Mosquitto and other Brookers.  
+🔜 **Coming Soon:** Node-RED integration for flow-based programming.  
+🔜 **Coming Soon:** Azure Event Grid setup for cloud event automation.  
 
-- For first-time users, press `F1` and type and select the command `Mxchip Create New MXCHIP AZ1366 Project`.
-- After the project has been scaffolded, open it in a new window or the current one.
-- Press `F1` and type the command `Mxchip Install Drivers` and select it. Enter your password to install `cmake`.
-- Once the drivers are installed, restart VSCode, then press `F1`, type the command `Mxchip Upload Project`, and make sure your MXchip is connected to the host machine.
-- Wait for the program to build and install on the devkit.
+---
 
-Ensure the following requirements are met before using this extension:
-
-- Visual Studio Code version 1.87.0 or higher.
-- Arduino IDE.
-
-## Extension Settings
+## **🔧 Extension Settings**
 
 This extension contributes the following settings:
 
@@ -68,13 +102,17 @@ This extension contributes the following settings:
 - `mxchip-az1366.MXCHIPExampleDinoGame`: Mxchip Example: Dino Game.
 - `mxchip-az1366.MXCHIPExamplePingPongGame`: Mxchip Example: Ping Pong Game.
 - `mxchip-az1366.MXCHIPInstallDrivers`: Mxchip Install Drivers.
+- `mxchip-az1366.MXCHIPExampleMQTTClient`: Mxchip Example: MQTT Client.
 
-## 📅 Roadmap / Upcoming Features
+---
 
-- 🌐 **Node-RED Integration**: Effortlessly link your devkit to diverse platforms with Node-RED.
-- ☁️ **Azure Event Grid**: Harness the immense capabilities of Azure Event Grid.
-- ⚙️ **.NET Nano Framework**: Explore the capabilities of the .NET Nano Framework.
-- 🔄 **MQTT Support**: Utilize cutting-edge MQTT protocols for seamless communication.
+## **📜 License**
+This project is licensed under the **MIT License**.  
+See the [LICENSE](https://github.com/Arnold208/mxchip-az1366-extension/blob/main/LICENSE) file for details.
+
+---
+
+**🚀 Enjoy developing with MXChip!** 🎉
 
 ## 🚧 Known Issues
 
@@ -93,6 +131,7 @@ Special thanks to the original creators of the code:
 
 - [Microsoft Learn Tutorial for MXCHIP AZ3166](https://learn.microsoft.com/en-us/azure/iot/tutorial-devkit-mxchip-az3166-iot-hub)
 - [Eclipse ThreadX Getting Started Guide](https://github.com/eclipse-threadx/getting-started)
+- [Eclipse ThreadX IoT DevKit Starter Application](https://github.com/eclipse-threadx/iot-devkit)
 
 
 ## For More Information
@@ -104,6 +143,8 @@ Special thanks to the original creators of the code:
 
 - [Subscribe to the IoT Tuesday Show on YouTube by Samuel Adranyi](https://www.youtube.com/@sadranyi)
 - [IoT Tuesday Show Series on the MXChip](https://www.youtube.com/watch?v=XN3sm4AvYFg)
+
+- [Arnold Kimkpe's Blog for IoT & Node-RED Tutorials](https://arnold8kimkpe.hashnode.dev/) *(Stay tuned for the Node-RED tutorial!)*
 
 
 ## 🛠 Contributing
