@@ -18,7 +18,8 @@
     "onCommand:mxchip-az1366.MXCHIPExampleButtonScreenRGB",
     "onCommand:mxchip-az1366.MXCHIPExampleDinoGame",
     "onCommand:mxchip-az1366.MXCHIPExamplePingPongGame",
-    "onCommand:mxchip-az1366.MXCHIPInstallDrivers"
+    "onCommand:mxchip-az1366.MXCHIPInstallDrivers",
+    "onCommand:mxchip-az1366.MXCHIPMQTTClient"
   ],
   "main": "./dist/extension.js",
   "type": "commonjs",
@@ -26,7 +27,7 @@
     "commands": [
       {
         "command": "mxchip-az1366.MXCHIPCreateProject",
-        "title": "Mxchip Create New MXCHIP AZ1366 Project"
+        "title": "Mxchip Create New Project"
       },
       {
         "command": "mxchip-az1366.MXCHIPUploadProject",
@@ -34,24 +35,31 @@
       },
       {
         "command": "mxchip-az1366.MXCHIPExampleButtonScreenCounter",
-        "title": "Mxchip Example: Button Screen Counter"
+        "title": "Mxchip Example: Counter"
       },
       {
         "command": "mxchip-az1366.MXCHIPExampleButtonScreenRGB",
-        "title": "Mxchip Example: Button Screen RGB"
+        "title": "Mxchip Example: Button"
       },
       {
         "command": "mxchip-az1366.MXCHIPExampleDinoGame",
-        "title": "Mxchip Example: Dino Game"
+        "title": "Mxchip Example: Dino"
       },
       {
         "command": "mxchip-az1366.MXCHIPExamplePingPongGame",
-        "title": "Mxchip Example: Ping Pong Game"
-      }
-      ,
+        "title": "Mxchip Example: Ping Pong"
+      },
       {
         "command": "mxchip-az1366.MXCHIPInstallDrivers",
         "title": "Mxchip Install Drivers"
+      },
+      {
+        "command": "mxchip-az1366.MXCHIPExampleIoTHubTelemetry",
+        "title": "Mxchip Example: Telemetry"
+      },
+      {
+        "command": "mxchip-az1366.MXCHIPMQTTClient",
+        "title": "Mxchip Example: MQTTClient"
       }
     ]
   },
@@ -81,6 +89,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
     "extract-zip": "^2.0.1",
     "ncp": "^2.0.0",
     "node-fetch": "^3.3.2"
