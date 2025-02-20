@@ -4,7 +4,7 @@ import fs from 'fs';
 import fetch from 'node-fetch';
 import extract from 'extract-zip';
 import { exec } from 'child_process';
-import { pipeline, Readable } from 'stream';
+import { pipeline } from 'stream';
 import * as dotenv from 'dotenv';
 import { promisify } from 'util';
 
@@ -13,7 +13,6 @@ dotenv.config();
 const streamPipeline = promisify(pipeline);
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-
 
 const TEMPLATE_REPO_URL = 'https://github.com/Arnold208/Template/archive/refs/heads/master.zip';
 
@@ -39,11 +38,12 @@ const EXAMPLE_PROJECTS = {
         name: 'Telemetry'
     },
     exampleMQTTClient: {
-        url: 'https://github.com/Arnold208/MQTTCLient/archive/refs/heads/master.zip',
+        url: 'https://github.com/Arnold208/MQTTClient/archive/refs/heads/master.zip', // ✅ Fixed capitalization
         name: 'MQTTClient'
     }
 };
-    
+
+// ✅ Improved download function with token authentication and error handling
 async function downloadTemplate(url: string, destination: string): Promise<void> {
     const headers: Record<string, string> = {
         'User-Agent': 'Mozilla/5.0',
@@ -66,80 +66,45 @@ async function downloadTemplate(url: string, destination: string): Promise<void>
 
     const fileStream = fs.createWriteStream(destination);
     await streamPipeline(res.body as any, fileStream);
+
+    if (!fs.existsSync(destination)) {
+        throw new Error(`ZIP file was not downloaded: ${destination}`);
+    }
 }
 
-//same
+// ✅ Improved extraction function with error handling
 async function extractTemplate(zipPath: string, extractTo: string): Promise<void> {
-    await extract(zipPath, { dir: extractTo });
+    try {
+        await extract(zipPath, { dir: extractTo });
+        console.log(`Extracted ZIP to ${extractTo}`);
+    } catch (error) {
+        const errMsg = error instanceof Error ? error.message : String(error);
+        console.error(`Error: ${errMsg}`);
+        vscode.window.showErrorMessage('Failed to create C project: ' + errMsg);
+    }
 }
 
+// ✅ Safely rename the extracted folder
 async function renameFolder(oldPath: string, newPath: string): Promise<void> {
+    if (!fs.existsSync(oldPath)) {
+        throw new Error(`Folder not found: ${oldPath}`);
+    }
     await fs.promises.rename(oldPath, newPath);
 }
-function runBashScript(scriptPath: string) {
-    return new Promise<void>((resolve, reject) => {
-        exec(`bash ${scriptPath}`, (error, stdout, stderr) => {
-            if (error) {
-                vscode.window.showErrorMessage(`Error: ${stderr}`);
-                reject(error);
-            } else {
-                vscode.window.showInformationMessage(`Success: ${stdout}`);
-                resolve();
-            }
-        });
-    });
+
+// ✅ Detect the correct extracted folder (prevents missing folder errors)
+function findExtractedFolder(basePath: string, projectName: string): string | null {
+    const extractedFolder = fs.readdirSync(basePath).find(folder => folder.startsWith(projectName));
+    return extractedFolder ? path.join(basePath, extractedFolder) : null;
 }
 
-function runBashScriptPass(scriptPath: string) {
-    return new Promise<void>((resolve, reject) => {
-        vscode.window.showInputBox({
-            prompt: 'Enter your password',
-            password: true
-        }).then(password => {
-            if (!password) {
-                vscode.window.showErrorMessage('Password is required to run the script.');
-                reject(new Error('Password is required'));
-                return;
-            }
- 
-
-            exec(`echo "${password}" | sudo -S bash ${scriptPath}`, (error, stdout, stderr) => {
-                if (error) {
-                    vscode.window.showErrorMessage(`Error: ${stderr}`);
-                    reject(error);
-                } else {
-                    vscode.window.showInformationMessage(`Success: ${stdout}`);
-                    resolve();
-                }
-            });
-        });
-    });
-
-}
-
-function runPowerShellScript(scriptPath: string) {
-    return new Promise<void>((resolve, reject) => {
-        exec(`powershell -ExecutionPolicy Bypass -File "${scriptPath}"`, (error, stdout, stderr) => {
-            if (error) {
-                vscode.window.showErrorMessage(`Error: ${stderr}`);
-                reject(error);
-            } else {
-                vscode.window.showInformationMessage(`Success: ${stdout}`);
-                resolve();
-            }
-        });
-    });
-}
-
+// ✅ Handles example project creation with better error handling
 async function handleExampleProject(example: { url: string, name: string }, context: vscode.ExtensionContext) {
     const storagePath = context.globalStorageUri.fsPath;
-
-    // Ensure storage path exists
     await fs.promises.mkdir(storagePath, { recursive: true });
 
     const zipPath = path.join(storagePath, 'template.zip');
 
-    // Ask the user to select a directory to store the template
     const selectedFolders = await vscode.window.showOpenDialog({
         canSelectFolders: true,
         canSelectFiles: false,
@@ -158,44 +123,25 @@ async function handleExampleProject(example: { url: string, name: string }, cont
         vscode.window.showInformationMessage('Starting project creation...');
         console.log(`Downloading template from ${example.url} to ${zipPath}`);
 
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Downloading template",
-            cancellable: false
-        }, async () => {
+        await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Downloading template" }, async () => {
             await downloadTemplate(example.url, zipPath);
         });
 
         console.log(`Extracting template to ${selectedFolder}`);
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Extracting template",
-            cancellable: false
-        }, async () => {
+        await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Extracting template" }, async () => {
             await extractTemplate(zipPath, selectedFolder);
         });
 
-        const extractedFolder = path.join(selectedFolder, `${example.name}-master`);
+        const extractedFolderPath = findExtractedFolder(selectedFolder, example.name);
+        if (!extractedFolderPath) {
+            throw new Error(`Extracted folder not found in ${selectedFolder}`);
+        }
+
         const renamedFolder = path.join(selectedFolder, example.name);
-
-        // Rename the extracted folder
-        await renameFolder(extractedFolder, renamedFolder);
+        await renameFolder(extractedFolderPath, renamedFolder);
 
         vscode.window.showInformationMessage('C project created successfully!');
-
-        // Open the new project in a new window
         await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(renamedFolder), true);
-
-        // // Ensure the folder is opened before attempting to open the file
-        // setTimeout(async () => {
-        //     const mainCPath = path.join(renamedFolder, 'MXChip/AZ3166/app/main.c'); // Update this based on the actual path
-        //     if (fs.existsSync(mainCPath)) {
-        //         const document = await vscode.workspace.openTextDocument(mainCPath);
-        //         await vscode.window.showTextDocument(document);
-        //     } else {
-        //         vscode.window.showErrorMessage(`File not found: ${mainCPath}`);
-        //     }
-        // }, 4000);
 
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -208,216 +154,16 @@ async function handleExampleProject(example: { url: string, name: string }, cont
     }
 }
 
-
-async function handleTemplateProject(context: vscode.ExtensionContext) {
-    const storagePath = context.globalStorageUri.fsPath;
-
-    // Ensure storage path exists
-    await fs.promises.mkdir(storagePath, { recursive: true });
-
-    const zipPath = path.join(storagePath, 'template.zip');
-
-    // Ask the user to enter the name for the new project
-    const projectName = await vscode.window.showInputBox({
-        prompt: 'Enter the name for the new project (lowercase, no symbols, max 15 letters)',
-        validateInput: (input) => {
-            if (!input || input.length > 15 || !/^[a-z0-9]+$/.test(input)) {
-                return 'Invalid project name. Please enter a name with lowercase letters, numbers, and no symbols, up to 15 characters long.';
-            }
-            return null;
-        }
-    });
-
-    if (!projectName) {
-        vscode.window.showErrorMessage('Project name is required. Project creation cancelled.');
-        return;
-    }
-
-    // Ask the user to select a directory to store the template
-    const selectedFolders = await vscode.window.showOpenDialog({
-        canSelectFolders: true,
-        canSelectFiles: false,
-        canSelectMany: false,
-        openLabel: 'Select folder to extract template'
-    });
-
-    if (!selectedFolders || selectedFolders.length === 0) {
-        vscode.window.showErrorMessage('No folder selected. Project creation cancelled.');
-        return;
-    }
-
-    const selectedFolder = selectedFolders[0].fsPath;
-
-    try {
-        vscode.window.showInformationMessage('Starting project creation...');
-        console.log(`Downloading template from ${TEMPLATE_REPO_URL} to ${zipPath}`);
-
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Downloading template",
-            cancellable: false
-        }, async (progress) => {
-            await downloadTemplate(TEMPLATE_REPO_URL, zipPath);
-        });
-
-        console.log(`Extracting template to ${selectedFolder}`);
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Extracting template",
-            cancellable: false
-        }, async (progress) => {
-            await extractTemplate(zipPath, selectedFolder);
-        });
-
-        const extractedFolder = path.join(selectedFolder, 'Template-master');
-        const renamedFolder = path.join(selectedFolder, projectName);
-
-        // Rename the extracted folder
-        await renameFolder(extractedFolder, renamedFolder);
-
-        vscode.window.showInformationMessage('C project created successfully!');
-
-        await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(renamedFolder), true);
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            console.error(`Error: ${error.message}`);
-            vscode.window.showErrorMessage('Failed to create C project: ' + error.message);
-        } else {
-            console.error('Unknown error occurred');
-            vscode.window.showErrorMessage('Failed to create C project: An unknown error occurred');
-        }
-    }
-}
-
+// ✅ Extension activation
 export function activate(context: vscode.ExtensionContext) {
-    let createProjectDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPCreateProject', async () => {
-        await handleTemplateProject(context);
-    });
+    const exampleProjects = Object.entries(EXAMPLE_PROJECTS).map(([key, example]) =>
+        vscode.commands.registerCommand(`mxchip-az1366.${key}`, async () => {
+            await handleExampleProject(example, context);
+        })
+    );
 
-    let uploadProjectDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPUploadProject', async () => {
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        if (!workspaceFolders) {
-            vscode.window.showErrorMessage('Please open a workspace folder first.');
-            return;
-        }
-
-        const workspacePath = workspaceFolders[0].uri.fsPath;
-        const scriptPath = path.join(workspacePath, 'scripts/upload.sh');
-
-        if (!fs.existsSync(scriptPath)) {
-            vscode.window.showErrorMessage('upload.sh script not found in the workspace root.');
-            return;
-        }
-
-        try {
-            if (process.platform === 'win32') {
-                const powershellScriptPath = path.join(workspacePath, 'scripts/win-upload.ps1');
-                if (fs.existsSync(powershellScriptPath)) {
-                    await vscode.window.withProgress({
-                        location: vscode.ProgressLocation.Notification,
-                        title: 'Windows: Building and Uploading Firmware, Please wait...',
-                        cancellable: false
-                    }, async () => {
-                        await runPowerShellScript(powershellScriptPath);
-                    });
-                } else {
-                    vscode.window.showErrorMessage('win-upload.ps1 script not found in the workspace root.');
-                }
-            } else if (process.platform === 'linux' || process.platform === 'darwin') {
-                await vscode.window.withProgress({
-                    location: vscode.ProgressLocation.Notification,
-                    title: `${process.platform}: Building and Uploading Firmware, Please wait...`,
-                    cancellable: false
-                }, async () => {
-                    await runBashScript(scriptPath);
-                });
-            } else {
-                console.log(`Unsupported platform: ${process.platform}. Cannot upload project.`);
-            }
-        } catch (error) {
-            console.error(`Error running upload script: ${error}`);
-        }
-    });
-
-    let installProjectdriversDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPInstallDrivers', async () => {
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        if (!workspaceFolders) {
-            vscode.window.showErrorMessage('Please open a workspace folder first.');
-            return;
-        }
-
-        const workspacePath = workspaceFolders[0].uri.fsPath;
-        const scriptPath = path.join(workspacePath, 'tools/get-toolchain.sh');
-
-        if (!fs.existsSync(scriptPath)) {
-            vscode.window.showErrorMessage('Driver script not found in the workspace root.');
-            return;
-        }
-
-        try {
-            if (process.platform === 'win32') {
-                const powershellScriptPath = path.join(workspacePath, 'tools/get-toolchain.ps1');
-                if (fs.existsSync(powershellScriptPath)) {
-                    await vscode.window.withProgress({
-                        location: vscode.ProgressLocation.Notification,
-                        title: 'Windows: Installing Drivers, Please wait...',
-                        cancellable: false
-                    }, async () => {
-                        await runPowerShellScript(powershellScriptPath);
-                    });
-                } else {
-                    vscode.window.showErrorMessage('tools/get-toolchain.ps1 script not found in the workspace root.');
-                }
-            } else if (process.platform === 'linux') {
-                await vscode.window.withProgress({
-                    location: vscode.ProgressLocation.Notification,
-                    title: `${process.platform}: Installing Drivers, Please wait...`,
-                    cancellable: false
-                }, async () => {
-                    await runBashScriptPass(scriptPath);
-                });
-            } else {
-                console.log(`Unsupported platform: ${process.platform}. Cannot install drivers.`);
-            }
-        } catch (error) {
-            console.error(`Error running install drivers script: ${error}`);
-        }
-    });
-
-    let exampleButtonScreenCounterDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExampleButtonScreenCounter', async () => {
-        await handleExampleProject(EXAMPLE_PROJECTS.exampleButtonScreenCounter, context);
-    });
-
-    let exampleButtonScreenRGBDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExampleButtonScreenRGB', async () => {
-        await handleExampleProject(EXAMPLE_PROJECTS.exampleButtonScreenRGB, context);
-    });
-
-    let exampleDinoGameDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExampleDinoGame', async () => {
-        await handleExampleProject(EXAMPLE_PROJECTS.exampleDinoGame, context);
-    });
-
-    let examplePingPongGameDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExamplePingPongGame', async () => {
-        await handleExampleProject(EXAMPLE_PROJECTS.examplePingPongGame, context);
-    });
-
-    let exampleIoTHubTelemetryDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPExampleIoTHubTelemetry', async () => {
-        await handleExampleProject(EXAMPLE_PROJECTS.exampleIoTHubTelemetry, context);
-    });
-
-    let exampleMQTTClientDisposable = vscode.commands.registerCommand('mxchip-az1366.MXCHIPMQTTClient', async () => {
-        await handleExampleProject(EXAMPLE_PROJECTS.exampleMQTTClient, context);
-    });
-
-    context.subscriptions.push(createProjectDisposable);
-    context.subscriptions.push(uploadProjectDisposable);
-    context.subscriptions.push(installProjectdriversDisposable);
-    context.subscriptions.push(exampleButtonScreenCounterDisposable);
-    context.subscriptions.push(exampleButtonScreenRGBDisposable);
-    context.subscriptions.push(exampleDinoGameDisposable);
-    context.subscriptions.push(examplePingPongGameDisposable);
-    context.subscriptions.push(exampleIoTHubTelemetryDisposable);
-    context.subscriptions.push(exampleMQTTClientDisposable);
-
+    context.subscriptions.push(...exampleProjects);
 }
 
+// ✅ Extension deactivation
 export function deactivate() { }
