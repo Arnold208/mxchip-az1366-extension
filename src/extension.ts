@@ -12,7 +12,7 @@ dotenv.config();
 
 const streamPipeline = promisify(pipeline);
 
-const GITHUB_TOKEN = "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";
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 
 const TEMPLATE_REPO_URL = 'https://github.com/Arnold208/Template/archive/refs/heads/master.zip';
