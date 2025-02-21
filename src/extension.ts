@@ -39,7 +39,7 @@ const EXAMPLE_PROJECTS = {
         name: 'Telemetry'
     },
     exampleMQTTClient: {
-        url: 'https://github.com/Arnold208/MQTTClient/archive/refs/heads/master.zip',
+        url: 'https://github.com/Arnold208/MQTTClient.git', // Change URL to actual Git repository
         name: 'MQTTClient'
     }
 };
@@ -138,76 +138,72 @@ async function handleExampleProject(example: { url: string, name: string }, cont
     // Ensure storage path exists
     await fs.promises.mkdir(storagePath, { recursive: true });
 
-    const zipPath = path.join(storagePath, 'template.zip');
-
-    // Ask the user to select a directory to store the template
+    // Ask the user to select a directory to store the cloned repository
     const selectedFolders = await vscode.window.showOpenDialog({
         canSelectFolders: true,
         canSelectFiles: false,
         canSelectMany: false,
-        openLabel: 'Select folder to extract template'
+        openLabel: 'Select folder to clone repository'
     });
 
     if (!selectedFolders || selectedFolders.length === 0) {
-        vscode.window.showErrorMessage('No folder selected. Project creation cancelled.');
+        vscode.window.showErrorMessage('No folder selected. Project cloning cancelled.');
         return;
     }
 
     const selectedFolder = selectedFolders[0].fsPath;
+    const targetPath = path.join(selectedFolder, example.name);
 
     try {
-        vscode.window.showInformationMessage('Starting project creation...');
-        console.log(`Downloading template from ${example.url} to ${zipPath}`);
+        vscode.window.showInformationMessage(`Cloning repository ${example.url}...`);
 
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: "Downloading template",
+            title: `Cloning ${example.name} repository`,
             cancellable: false
         }, async () => {
-            await downloadTemplate(example.url, zipPath);
+            // If the repository already exists, pull the latest changes
+            if (fs.existsSync(targetPath)) {
+                vscode.window.showInformationMessage(`Repository already exists. Pulling latest changes...`);
+                await execPromise(`git -C "${targetPath}" pull origin main`);
+            } else {
+                // Clone the repository WITHOUT `--recurse-submodules`
+                await execPromise(`git clone "${example.url.replace('/archive/refs/heads/master.zip', '.git')}" "${targetPath}"`);
+            }
         });
 
-        console.log(`Extracting template to ${selectedFolder}`);
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Extracting template",
-            cancellable: false
-        }, async () => {
-            await extractTemplate(zipPath, selectedFolder);
-        });
-
-        const extractedFolder = path.join(selectedFolder, `${example.name}-main`);
-        const renamedFolder = path.join(selectedFolder, example.name);
-
-        // Rename the extracted folder
-        await renameFolder(extractedFolder, renamedFolder);
-
-        vscode.window.showInformationMessage('C project created successfully!');
+        vscode.window.showInformationMessage('Repository cloned successfully!');
 
         // Open the new project in a new window
-        await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(renamedFolder), true);
-
-        // // Ensure the folder is opened before attempting to open the file
-        // setTimeout(async () => {
-        //     const mainCPath = path.join(renamedFolder, 'MXChip/AZ3166/app/main.c'); // Update this based on the actual path
-        //     if (fs.existsSync(mainCPath)) {
-        //         const document = await vscode.workspace.openTextDocument(mainCPath);
-        //         await vscode.window.showTextDocument(document);
-        //     } else {
-        //         vscode.window.showErrorMessage(`File not found: ${mainCPath}`);
-        //     }
-        // }, 4000);
+        await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(targetPath), true);
 
     } catch (error: unknown) {
         if (error instanceof Error) {
             console.error(`Error: ${error.message}`);
-            vscode.window.showErrorMessage('Failed to create C project: ' + error.message);
+            vscode.window.showErrorMessage(`Failed to clone repository: ${error.message}`);
         } else {
             console.error('Unknown error occurred');
-            vscode.window.showErrorMessage('Failed to create C project: An unknown error occurred');
+            vscode.window.showErrorMessage('Failed to clone repository: An unknown error occurred');
         }
     }
 }
+
+// Utility function to execute shell commands
+function execPromise(command: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Error: ${stderr}`);
+                reject(error);
+            } else {
+                console.log(`Success: ${stdout}`);
+                resolve();
+            }
+        });
+    });
+}
+
+
 
 
 async function handleTemplateProject(context: vscode.ExtensionContext) {
